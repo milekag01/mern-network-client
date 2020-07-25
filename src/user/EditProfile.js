@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { isAuthenticated } from "../auth";
 import { read, update } from "./apiUser";
 import { Redirect } from "react-router-dom";
+import DefaultProfile from "../images/avatar.jpg";
 
 class EditProfile extends Component {
     constructor() {
@@ -12,7 +13,9 @@ class EditProfile extends Component {
             email: "",
             password: "",
             redirectToProfile: false,
-            error: ""
+            error: "",
+            fileSize: 0,
+            loading: false
         };
     }
 
@@ -39,8 +42,12 @@ class EditProfile extends Component {
     }
 
     isValid = () => {
-        const { name, email, password } = this.state;
-        if (name.length == 0) {
+        const { name, email, password, fileSize } = this.state;
+        if (fileSize > 100000) {
+            this.setState({ error: "File size should be less than 100kb" });
+            return false;
+        }
+        if (name.length === 0) {
             this.setState({ error: "Name is required" });
             return false;
         }
@@ -59,23 +66,20 @@ class EditProfile extends Component {
     };
 
     handleChange = name => event => {
+        this.setState({ error: "" });
         const value =
             name === "photo" ? event.target.files[0] : event.target.value;
+
+        const fileSize = name === "photo" ? event.target.files[0].size : 0;
         this.userData.set(name, value);
-        this.setState({ [name]: value });
+        this.setState({ [name]: value, fileSize });
     };
 
     clickSubmit = event => {
         event.preventDefault();
+        this.setState({ loading: true });
 
         if (this.isValid()) {
-            const { name, email, password } = this.state;
-            const user = {
-                name,
-                email,
-                password: password || undefined
-            };
-            // console.log(user);
             const userId = this.props.match.params.userId;
             const token = isAuthenticated().token;
 
@@ -86,6 +90,8 @@ class EditProfile extends Component {
                         redirectToProfile: true
                     });
             });
+        } else {
+            this.setState({ loading: false });  // hide loader in invalid case
         }
     };
 
@@ -143,12 +149,19 @@ class EditProfile extends Component {
             email,
             password,
             redirectToProfile,
-            error
+            error,
+            loading
         } = this.state;
 
         if (redirectToProfile) {
             return <Redirect to={`/user/${id}`} />;
         }
+
+        const photoUrl = id
+            ? `${
+                  process.env.REACT_APP_API_URL
+              }/user/photo/${id}?${new Date().getTime()}`
+            : DefaultProfile;
 
         return (
             <div className="container">
@@ -159,6 +172,26 @@ class EditProfile extends Component {
                 >
                     {error}
                 </div>
+
+                {loading ? (
+                    <div className="jumbotron text-center">
+                        <h2>Loading...</h2>
+                    </div>
+                ) : (
+                    ""
+                )}
+
+                <img
+                    style={{
+                        width: "auto",
+                        height: "300px",
+                        objectFit: "cover"
+                    }}
+                    className="card-img-top"
+                    src={photoUrl}
+                    onError={i => (i.target.src = `${DefaultProfile}`)}
+                    alt={name}
+                />
 
                 {this.signupForm(name, email, password)}
             </div>
