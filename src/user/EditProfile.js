@@ -33,6 +33,7 @@ class EditProfile extends Component {
     };
 
     componentDidMount() {
+        this.userData = new FormData();
         const userId = this.props.match.params.userId;
         this.init(userId);
     }
@@ -45,7 +46,7 @@ class EditProfile extends Component {
         }
         // email@domain.com
         if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-            this.setState({ error: "Please enter a valid Email" });
+            this.setState({ error: "A valid Email is required" });
             return false;
         }
         if (password.length >= 1 && password.length <= 5) {
@@ -58,7 +59,10 @@ class EditProfile extends Component {
     };
 
     handleChange = name => event => {
-        this.setState({ [name]: event.target.value });
+        const value =
+            name === "photo" ? event.target.files[0] : event.target.value;
+        this.userData.set(name, value);
+        this.setState({ [name]: value });
     };
 
     clickSubmit = event => {
@@ -75,7 +79,7 @@ class EditProfile extends Component {
             const userId = this.props.match.params.userId;
             const token = isAuthenticated().token;
 
-            update(userId, token, user).then(data => {
+            update(userId, token, this.userData).then(data => {
                 if (data.error) this.setState({ error: data.error });
                 else
                     this.setState({
@@ -87,6 +91,15 @@ class EditProfile extends Component {
 
     signupForm = (name, email, password) => (
         <form>
+            <div className="form-group">
+                <label className="text-muted">Profile Photo</label>
+                <input
+                    onChange={this.handleChange("photo")}
+                    type="file"
+                    accept="image/*"
+                    className="form-control"
+                />
+            </div>
             <div className="form-group">
                 <label className="text-muted">Name</label>
                 <input
