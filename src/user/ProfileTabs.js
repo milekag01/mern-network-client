@@ -16,8 +16,13 @@ class ProfileTabs extends Component {
                                 <div>
                                     <Link to={`/user/${person._id}`}>
                                         <img
+                                            style={{
+                                                borderRadius: "50%",
+                                                border: "1.3px solid #349688"
+                                            }}
                                             className="float-left mr-2"
                                             height="30px"
+                                            width="30px"
                                             onError={i =>
                                                 (i.target.src = `${DefaultProfile}`)
                                             }
@@ -45,8 +50,13 @@ class ProfileTabs extends Component {
                                 <div>
                                     <Link to={`/user/${person._id}`}>
                                         <img
+                                            style={{
+                                                borderRadius: "50%",
+                                                border: "1.3px solid #349688"
+                                            }}
                                             className="float-left mr-2"
                                             height="30px"
+                                            width="30px"
                                             onError={i =>
                                                 (i.target.src = `${DefaultProfile}`)
                                             }
