@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { isAuthenticated } from "../auth";
-import { read, update } from "./apiUser";
+import { read, update, updateUser } from "./apiUser";
 import { Redirect } from "react-router-dom";
 import DefaultProfile from "../images/avatar.jpg";
 
@@ -15,7 +15,8 @@ class EditProfile extends Component {
             redirectToProfile: false,
             error: "",
             fileSize: 0,
-            loading: false
+            loading: false,
+            about: ""
         };
     }
 
@@ -29,7 +30,8 @@ class EditProfile extends Component {
                     id: data._id,
                     name: data.name,
                     email: data.email,
-                    error: ""
+                    error: "",
+                    about: data.about
                 });
             }
         });
@@ -44,21 +46,22 @@ class EditProfile extends Component {
     isValid = () => {
         const { name, email, password, fileSize } = this.state;
         if (fileSize > 100000) {
-            this.setState({ error: "File size should be less than 100kb" });
+            this.setState({ error: "File size should be less than 100kb", loading: false });
             return false;
         }
         if (name.length === 0) {
-            this.setState({ error: "Name is required" });
+            this.setState({ error: "Name is required", loading: false });
             return false;
         }
         // email@domain.com
         if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-            this.setState({ error: "A valid Email is required" });
+            this.setState({ error: "A valid Email is required", loading: false });
             return false;
         }
         if (password.length >= 1 && password.length <= 5) {
             this.setState({
-                error: "Password must be at least 6 characters long"
+                error: "Password must be at least 6 characters long",
+                loading: false
             });
             return false;
         }
@@ -86,16 +89,16 @@ class EditProfile extends Component {
             update(userId, token, this.userData).then(data => {
                 if (data.error) this.setState({ error: data.error });
                 else
-                    this.setState({
-                        redirectToProfile: true
+                    updateUser(data, () => {
+                        this.setState({
+                            redirectToProfile: true
+                        });
                     });
             });
-        } else {
-            this.setState({ loading: false });  // hide loader in invalid case
         }
     };
 
-    signupForm = (name, email, password) => (
+    signupForm = (name, email, password, about) => (
         <form>
             <div className="form-group">
                 <label className="text-muted">Profile Photo</label>
@@ -124,6 +127,17 @@ class EditProfile extends Component {
                     value={email}
                 />
             </div>
+
+            <div className="form-group">
+                <label className="text-muted">About</label>
+                <textarea
+                    onChange={this.handleChange("about")}
+                    type="text"
+                    className="form-control"
+                    value={about}
+                />
+            </div>
+
             <div className="form-group">
                 <label className="text-muted">Password</label>
                 <input
@@ -150,7 +164,8 @@ class EditProfile extends Component {
             password,
             redirectToProfile,
             error,
-            loading
+            loading,
+            about
         } = this.state;
 
         if (redirectToProfile) {
@@ -160,7 +175,7 @@ class EditProfile extends Component {
         const photoUrl = id
             ? `${
                   process.env.REACT_APP_API_URL
-              }/user/photo/${id}?${new Date().getTime()}`
+              }/user/photo/${id}?${new Date().getTime()}`   // to get updated image without refresh which occurs due to browser cache
             : DefaultProfile;
 
         return (
@@ -193,7 +208,7 @@ class EditProfile extends Component {
                     alt={name}
                 />
 
-                {this.signupForm(name, email, password)}
+                {this.signupForm(name, email, password, about)}
             </div>
         );
     }
