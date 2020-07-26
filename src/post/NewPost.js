@@ -63,6 +63,7 @@ class NewPost extends Component {
                 else {
                     this.setState({
                         title: "",
+                        loading: false,
                         body: "",
                         loading: false,
                         redirectToProfile: true
