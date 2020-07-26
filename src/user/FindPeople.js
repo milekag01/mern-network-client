@@ -36,11 +36,11 @@ class FindPeople extends Component {
                 this.setState({ error: data.error });
             } else {
                 let toFollow = this.state.users;
-                toFollow.splice(i, 1);
+                toFollow.splice(i, 1);  // remove the followed user from list
                 this.setState({
                     users: toFollow,
                     open: true,
-                    followMessage: `Following ${user.name}`
+                    followMessage: `You started following ${user.name}`
                 });
             }
         });
@@ -51,8 +51,12 @@ class FindPeople extends Component {
             {users.map((user, i) => (
                 <div className="card col-md-4" key={i}>
                     <img
-                        style={{ height: "200px", width: "auto" }}
-                        className="img-thumbnail"
+                        style={{
+                            width: "100%",
+                            height: "auto",
+                            objectFit: "cover"
+                        }}
+                        className="card-img-top"
                         src={`${process.env.REACT_APP_API_URL}/user/photo/${
                             user._id
                         }`}
