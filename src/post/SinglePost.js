@@ -1,11 +1,13 @@
 import React, { Component } from "react";
-import { singlePost } from "./apiPost";
+import { singlePost, remove } from "./apiPost";
 import DefaultPost from "../images/mountains.jpg";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
+import { isAuthenticated } from "../auth";
 
 class SinglePost extends Component {
     state = {
-        post: ""
+        post: "",
+        redirectToHome: false
     };
 
     componentDidMount = () => {
@@ -15,6 +17,18 @@ class SinglePost extends Component {
                 console.log(data.error);
             } else {
                 this.setState({ post: data });
+            }
+        });
+    };
+
+    deletePost = () => {
+        const postId = this.props.match.params.postId;
+        const token = isAuthenticated().token;
+        remove(postId, token).then(data => {
+            if (data.error) {
+                console.log(data.error);
+            } else {
+                this.setState({ redirectToHome: true });
             }
         });
     };
@@ -45,14 +59,39 @@ class SinglePost extends Component {
                     Posted by <Link to={`${posterId}`}>{posterName} </Link>
                     on {new Date(post.created).toDateString()}
                 </p>
-                <Link to={`/`} className="btn btn-raised btn-primary btn-sm">
-                    Back to posts
-                </Link>
+                
+                <div className="d-inline-block">
+                    <Link
+                        to={`/`}
+                        className="btn btn-raised btn-primary btn-sm mr-5"
+                    >
+                        Back to posts
+                    </Link>
+
+                    {isAuthenticated().user &&
+                        isAuthenticated().user._id === post.postedBy._id && (
+                            <>
+                                <button className="btn btn-raised btn-warning mr-5">
+                                    Update Post
+                                </button>
+                                <button 
+                                    className="btn btn-raised btn-danger"
+                                    onClick={this.deletePost}
+                                >
+                                    Delete Post
+                                </button>
+                            </>
+                        )}
+                </div>
             </div>
         );
     };
 
     render() {
+        
+        if (this.state.redirectToHome) {
+            return <Redirect to={`/`} />;
+        }
         const { post } = this.state;
         return (
             <div className="container">
