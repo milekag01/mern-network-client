@@ -33,6 +33,15 @@ class SinglePost extends Component {
         });
     };
 
+    deleteConfirmed = () => {
+        let answer = window.confirm(
+            "Are you sure you want to delete this post?"
+        );
+        if (answer) {
+            this.deletePost();
+        }
+    };
+
     renderPost = post => {
         const posterId = post.postedBy ? `/user/${post.postedBy._id}` : "";
         const posterName = post.postedBy ? post.postedBy.name : " Unknown";
@@ -41,13 +50,13 @@ class SinglePost extends Component {
             <div className="card-body">
                 <img
                     src={`${process.env.REACT_APP_API_URL}/post/photo/${
-                        post._id
-                    }`}
+                        post._id}?${new Date().getTime()}`}
+
                     alt={post.title}
                     onError={i => (i.target.src = `${DefaultPost}`)}
                     className="img-thunbnail mb-3"
                     style={{
-                        height: "300px",
+                        height: "auto",
                         width: "100%",
                         objectFit: "cover"
                     }}
@@ -71,12 +80,15 @@ class SinglePost extends Component {
                     {isAuthenticated().user &&
                         isAuthenticated().user._id === post.postedBy._id && (
                             <>
-                                <button className="btn btn-raised btn-warning mr-5">
+                                <Link 
+                                    className="btn btn-raised btn-warning mr-5"
+                                    to={`/post/edit/${post._id}`}
+                                >
                                     Update Post
-                                </button>
+                                </Link>
                                 <button 
                                     className="btn btn-raised btn-danger"
-                                    onClick={this.deletePost}
+                                    onClick={this.deleteConfirmed}
                                 >
                                     Delete Post
                                 </button>

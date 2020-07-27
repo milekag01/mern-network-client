@@ -44,7 +44,7 @@ class Posts extends Component {
                                     }}
                                     src={`${
                                         process.env.REACT_APP_API_URL
-                                    }/post/photo/${post._id}`}
+                                    }/post/photo/${post._id}?${new Date().getTime()}`}
                                     alt={post.title}
                                     onError={i =>
                                         (i.target.src = `${DefaultPost}`)
